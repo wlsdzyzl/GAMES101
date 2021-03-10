@@ -10,3 +10,4 @@ This is a collection of the assignments of [Games 101](https://sites.cs.ucsb.edu
 ### 4. Bezier Curve
 ![](./images/hw4.png)
 ### 5. Ray Tracing
+![](./images/hw5.png)
