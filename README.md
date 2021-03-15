@@ -13,3 +13,5 @@ This is a collection of the assignments of [Games 101](https://sites.cs.ucsb.edu
 ![](./images/hw5.png)
 ### 6. Ray Tracing (2, BVH)
 ![](./images/hw6.png)
+### 7. Ray Tracing (3, Path Tracing)
+![](./images/hw7.png)

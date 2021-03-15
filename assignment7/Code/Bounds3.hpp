@@ -113,9 +113,7 @@ inline bool Bounds3::IntersectP(const Ray& ray, const Vector3f& invDir,
     // std::cout<<t_min<<" "<<t_max<<std::endl;
     if(t_max >= 0 && t_min <= t_max) return true;
     return false;
-    //here we don't consider the corner case: the ray parallel with the axis
-    // do we need dirIsNeg? 
-    
+
 }
 
 inline Bounds3 Union(const Bounds3& b1, const Bounds3& b2)
