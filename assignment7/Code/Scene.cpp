@@ -3,7 +3,6 @@
 //
 
 #include "Scene.hpp"
-
 void Scene::buildBVH() {
     printf(" - Generating BVH...\n\n");
     this->bvh = new BVHAccel(objects, 1, BVHAccel::SplitMethod::NAIVE);
@@ -75,28 +74,28 @@ Vector3f Scene::shade(const Ray &ray) const
     Intersection blocked = intersect(direct_ray);
 
 
-    if(!blocked.happened || blocked.obj->hasEmit())
+    if(blocked.happened && blocked.obj->hasEmit())
     {
         // brdf of light source
 
         //here the cos_theta is zero.
         Vector3f f_r_ls = pos_on_obj.m->eval( - ray.direction, direct_ray.direction, pos_on_obj.normal);
-        float cos_theta = dotProduct(direct_ray.direction, pos_on_obj.normal);
-        float cos_theta_ = dotProduct(-direct_ray.direction, pos_on_ls.normal);
+        float cos_theta = std::max(0.0f, dotProduct(direct_ray.direction, pos_on_obj.normal));
+        float cos_theta_ = std::max(0.0f, dotProduct(-direct_ray.direction, pos_on_ls.normal));
         direct_energy = pos_on_ls.emit * f_r_ls * cos_theta * cos_theta_ / squaredNorm(pos_on_ls.coords - pos_on_obj.coords) / pdf_ls;
     }
     // Use russian Roulette to determine whether we should terminate the process
-    float p = get_random_float();
-    if(p < RussianRoulette && !pos_on_obj.obj->hasEmit())
-    {
-        Vector3f w_o = pos_on_obj.m->sample(- ray.direction, pos_on_obj.normal);
-        Vector3f f_r_obj = pos_on_obj.m->eval(- ray.direction, w_o, pos_on_obj.normal);
-        float pdf_obj = pos_on_obj.m->pdf(- ray.direction, w_o, pos_on_obj.normal);
-        Ray next_ray(pos_on_obj.coords, w_o);
-        Vector3f radiance = shade(next_ray);
-        float cos_theta = dotProduct(next_ray.direction, pos_on_obj.normal);
-        bounced_energy += f_r_obj * radiance * cos_theta / pdf_obj / RussianRoulette;
-    }
+    // float p = get_random_float();
+    // if(p < RussianRoulette && !pos_on_obj.obj->hasEmit() )
+    // {
+    //     Vector3f w_o = pos_on_obj.m->sample(- ray.direction, pos_on_obj.normal).normalized();
+    //     Vector3f f_r_obj = pos_on_obj.m->eval(- ray.direction, w_o, pos_on_obj.normal);
+    //     float pdf_obj = pos_on_obj.m->pdf(- ray.direction, w_o, pos_on_obj.normal);
+    //     Ray next_ray(pos_on_obj.coords, w_o);
+    //     Vector3f radiance = shade(next_ray);
+    //     float cos_theta = std::max(0.0f, dotProduct(next_ray.direction, pos_on_obj.normal));
+    //     bounced_energy +=  radiance * f_r_obj * cos_theta / (pdf_obj + EPSILON) / RussianRoulette;
+    // }
     return  direct_energy + bounced_energy;
 }
 // Implementation of Path Tracing

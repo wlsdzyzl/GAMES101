@@ -5,7 +5,7 @@
 #include <fstream>
 #include "Scene.hpp"
 #include "Renderer.hpp"
-
+#include "omp.h"
 
 inline float deg2rad(const float& deg) { return deg * M_PI / 180.0; }
 
@@ -14,21 +14,23 @@ const float EPSILON = 0.00001;
 // The main render function. This where we iterate over all pixels in the image,
 // generate primary rays and cast these rays into the scene. The content of the
 // framebuffer is saved to a file.
-void Renderer::Render(const Scene& scene)
+void Renderer::Render(const Scene& scene, int spp)
 {
     std::vector<Vector3f> framebuffer(scene.width * scene.height);
 
     float scale = tan(deg2rad(scene.fov * 0.5));
     float imageAspectRatio = scene.width / (float)scene.height;
     Vector3f eye_pos(278, 273, -800);
-    int m = 0;
 
     // change the spp value to change sample ammount
-    int spp = 16;
+    
     std::cout << "SPP: " << spp << "\n";
-    for (uint32_t j = 0; j < scene.height; ++j) {
-        for (uint32_t i = 0; i < scene.width; ++i) {
+    for (int j = 0; j < scene.height; ++j) {
+omp_set_num_threads(8);
+#pragma omp parallel for 
+        for (int i = 0; i < scene.width; ++i) {
             // generate primary ray direction
+            int m = j * scene.width + i;
             float x = (2 * (i + 0.5) / (float)scene.width - 1) *
                       imageAspectRatio * scale;
             float y = (1 - 2 * (j + 0.5) / (float)scene.height) * scale;
@@ -38,14 +40,14 @@ void Renderer::Render(const Scene& scene)
             for (int k = 0; k < spp; k++){
                 framebuffer[m] += scene.castRay(Ray(eye_pos, dir), 0) / spp;  
             }
-            m++;
+            
         }
         UpdateProgress(j / (float)scene.height);
     }
     UpdateProgress(1.f);
 
     // save framebuffer to file
-    FILE* fp = fopen("binary.ppm", "wb");
+    FILE* fp = fopen(("binary_"+std::to_string(spp)+".ppm").c_str(), "wb");
     (void)fprintf(fp, "P6\n%d %d\n255\n", scene.width, scene.height);
     for (auto i = 0; i < scene.height * scene.width; ++i) {
         static unsigned char color[3];
