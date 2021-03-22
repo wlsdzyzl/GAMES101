@@ -36,3 +36,7 @@ Using openmp and static random engine for acceleration
 ![](./images/hw7_256.png)
 
 The result is still noisy, and will be fixed in latter days.
+
+### 8. Rope Stimulation (Mass Spring System)
+![](./images/hw8.gif)
+Explicit Euler Method leads to diverge.
